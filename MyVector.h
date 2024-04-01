@@ -44,16 +44,20 @@ public:
         return m_capacity;
     }
 
+    //
     bool empty() const noexcept {
         return m_size == 0;
     }
 
+    // Метод для добавления элемента в конец вектора
     void push_back(const T& value) {
         if (m_size == m_capacity) {
             realloc();
         }
         m_buffer[m_size++] = value;
     }
+
+    // Метод для удаления последнего элемента
     void pop_back() {
         if (empty()) {
             throw std::out_of_range("Vector is empty");
@@ -61,6 +65,7 @@ public:
         m_buffer[m_size--];
     }
 
+    // Метод для вставки элемента по указанному индексу
     void insert(int index, const T& value) {
         if (index >= 0 && index <= m_size) {
             if (m_size == m_capacity) {
@@ -74,6 +79,7 @@ public:
         }
     }
 
+    // Метод для удаления элемента по указанному индуксу
     void erase(int index) {
         if (index < 0 || index >= m_size) {
             throw std::out_of_range("Index out of range");
@@ -82,6 +88,23 @@ public:
             m_buffer[i] = m_buffer[i + 1];
         }
         m_size--;
+    }
+
+    // Метод для доступа к элементу по указанному индексу
+    T& at(const int index) {
+        if (index < 0 || index >= m_size) {
+            throw std::out_of_range("Index out of range");
+        }
+        return m_buffer[index];
+    }
+
+    //Метод для ставки элемента с заменой по указаному индексу
+    template<typename Args>
+    void emplace(const int index, Args&& args) const {
+        if (index < 0 && index >= m_size) {
+            throw std::out_of_range("Index out of range");
+        }
+        m_buffer[index] = T(std::forward<Args>(args));
     }
 
     T* begin() const {

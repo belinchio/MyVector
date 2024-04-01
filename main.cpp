@@ -38,5 +38,11 @@ int main()
         std::cout << el << " ";
     }
     std::cout<< std::endl;
+
+    num.emplace(4, 15);
+    for (const auto& el : num) {
+        std::cout << el << " ";
+    }
+    std::cout<< std::endl;
     return 0;
 }
