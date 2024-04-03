@@ -1,7 +1,10 @@
 #pragma once
 
 #include <iostream>
+#include <iterator>
 #include <initializer_list>
+#include <limits>
+#include <cassert>
 
 template <typename T>
 class Vector {
@@ -11,7 +14,7 @@ private:
     size_t m_capacity = 0;
 
     void realloc() {
-        constexpr size_t INITIAL_CAPACITY = 16u;
+        constexpr size_t INITIAL_CAPACITY = 8u;
         const size_t new_capacity = std::max(INITIAL_CAPACITY, m_capacity * 2);
 
         auto* new_buffer = new T[new_capacity];
@@ -24,28 +27,86 @@ private:
     }
 
 public:
+
+    // Конструктор по умолчанию
     Vector() = default;
 
+    // Конструктор
     Vector(std::initializer_list<T> initList) {
         for (const auto& elem : initList) {
             push_back(elem);
         }
     }
 
+    // Деструктор
     ~Vector() {
         delete[] m_buffer;
     }
 
-    int size() const noexcept {
+    /* Итераторы
+     *      begin/cbegin возвращает итератор на начало
+     *      end/cend возвращает итератор на конеч
+     *      rbegin/crbegin возвращает обратный итератор на начало
+     *      rend/crend вщзвращает обратный итератор на конец
+     */
+
+    const T& operator [](size_t index) const noexcept {
+        return const_cast<Vector&>(*this)[index];
+    }
+
+    T& operator [](size_t index) noexcept {
+        return m_buffer[index];
+    }
+
+    T* begin() const {
+        return m_buffer;
+    }
+
+    const T* cbegin() const {
+        return m_buffer;
+    }
+
+    T* end() const {
+        return m_buffer + m_size;
+    }
+
+    const T* cend() const {
+        return m_buffer + m_size;
+    }
+
+    std::reverse_iterator<T*> rbegin() const {
+        return std::reverse_iterator<T*>(m_buffer + m_size);
+    }
+
+    std::reverse_iterator<const T*> crbegin() const {
+        return std::reverse_iterator<const T*>(m_buffer + m_size);
+    }
+
+    std::reverse_iterator<T*> rend() const {
+        std::reverse_iterator<T*>m_buffer;
+    }
+
+    std::reverse_iterator<const T*> crend() const {
+        return std::reverse_iterator<const T*>(m_buffer);
+    }
+
+    // Метод для получения текущего размера вектора
+    [[nodiscard]] size_t size() const noexcept {
         return m_size;
     }
 
-    int capacity() const noexcept {
+    // Метод для получения максимально возможной вместимости вектора
+    [[nodiscard]] size_t max_size() const noexcept {
+        return std::numeric_limits<size_t>::max();
+    }
+
+    // Метод для получения текущей вместимости вектора
+    [[nodiscard]] size_t capacity() const noexcept {
         return m_capacity;
     }
 
-    //
-    bool empty() const noexcept {
+    // Метод для проверки "пуст ли" вектор
+    [[nodiscard]] bool empty() const noexcept {
         return m_size == 0;
     }
 
@@ -66,16 +127,21 @@ public:
     }
 
     // Метод для вставки элемента по указанному индексу
-    void insert(int index, const T& value) {
-        if (index >= 0 && index <= m_size) {
-            if (m_size == m_capacity) {
-                realloc();
+    void insert(size_t index, const T& value) {
+        try {
+            if (index > 0 && index <= m_size - 1) {
+                if (m_size == m_capacity) {
+                    realloc();
+                }
+                for (size_t i = m_size - 1; i >= index; --i) {
+                    m_buffer[i + 1] = m_buffer[i];
+                }
+                m_buffer[index] = value;
+                m_size++;
             }
-            for (int i = m_size - 1; i >= index; --i) {
-                m_buffer[i + 1] = m_buffer[i];
-            }
-            m_buffer[index] = value;
-            m_size++;
+        }  catch (...) {
+            throw std::out_of_range("The index is out of acceptable range");
+
         }
     }
 
@@ -107,11 +173,56 @@ public:
         m_buffer[index] = T(std::forward<Args>(args));
     }
 
-    T* begin() const {
+    //Метод для изменения размера вектора
+    void resize(size_t new_size) {
+        if (new_size < 0) {
+            new_size = 0;
+        }
+        if (new_size != m_size) {
+            if (new_size > m_capacity) {
+                m_capacity = new_size;
+                T* new_buffer = new T[m_capacity];
+                for (size_t i = 0; i < m_size; ++i) {
+                    new_buffer[i] = m_buffer[i];
+                }
+                delete[] m_buffer;
+                m_buffer = new_buffer;
+            }
+            m_size = new_size;
+        }
+    }
+
+    // Медод обнена содержимого двух векторов
+    void swap(Vector<T>& other) noexcept {
+        using std::swap;
+        std::swap(m_buffer, other.m_buffer);
+        std::swap(m_size, other.m_size);
+        std::swap(m_capacity, other.m_capacity);
+    }
+
+    constexpr const T& front() const {
+        return *begin();
+    }
+
+    constexpr const T& back() const {
+        return *std::prev(end());
+    }
+
+    constexpr T* data() noexcept {
         return m_buffer;
     }
 
-    T* end() const {
-        return m_buffer + m_size;
+    constexpr const T* data() const noexcept {
+        return m_buffer;
+    }
+
+    constexpr T& at(size_t index) {
+        try {
+            if (index >= 0 && index < m_size) {
+                return m_buffer[index];
+            }
+        } catch (std::exception& e) {
+            std::cerr << e.what() << std::endl;
+        }
     }
 };
