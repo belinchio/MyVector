@@ -81,7 +81,7 @@ int main()
     Vector<size_t> d {1, 2, 3, 4, 5};
     std::cout << "первый элемент - " << d.front() << std::endl;
     std::cout << "последний элемент - " << d.back() << std::endl;
-    std::cout << str.at(2) << std::endl;
+    std::cout << str.at(0) << std::endl;
     std::cout << std::endl;
     std::cout << "/////////////////////" << std::endl;
     Vector<int> v {1, 2, 3, 4, 5, 6, 7};

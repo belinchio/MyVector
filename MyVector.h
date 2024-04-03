@@ -14,7 +14,7 @@ private:
     size_t m_capacity = 0;
 
     void realloc() {
-        constexpr size_t INITIAL_CAPACITY = 8u;
+        constexpr size_t INITIAL_CAPACITY = 16u;
         const size_t new_capacity = std::max(INITIAL_CAPACITY, m_capacity * 2);
 
         auto* new_buffer = new T[new_capacity];
@@ -31,7 +31,25 @@ public:
     // Конструктор по умолчанию
     Vector() = default;
 
-    // Конструктор
+    //Конструктор копирования
+    Vector(const Vector& other) : m_size(other.m_size), m_capacity(other.m_capacity) {
+        if (other.m_capacity != 0u) {
+            m_buffer = new T[other.m_capacity];
+            try {
+                std::copy(other.m_buffer, other.m_buffer + other.m_size, m_buffer);
+            } catch (...) {
+                delete[]m_buffer;
+                throw;
+            }
+        }
+    }
+
+    // Коструктор перемещения
+    Vector(const Vector&& other) noexcept {
+        swap(other);
+    }
+
+    // Конструктор, инициализирующий списком initList
     Vector(std::initializer_list<T> initList) {
         for (const auto& elem : initList) {
             push_back(elem);
@@ -157,8 +175,8 @@ public:
     }
 
     // Метод для доступа к элементу по указанному индексу
-    T& at(const int index) {
-        if (index < 0 || index >= m_size) {
+    T& at(const size_t index) {
+        if (index >= m_size) {
             throw std::out_of_range("Index out of range");
         }
         return m_buffer[index];
@@ -216,13 +234,13 @@ public:
         return m_buffer;
     }
 
-    constexpr T& at(size_t index) {
-        try {
-            if (index >= 0 && index < m_size) {
-                return m_buffer[index];
-            }
-        } catch (std::exception& e) {
-            std::cerr << e.what() << std::endl;
-        }
-    }
+//    constexpr T& at(size_t index) {
+//        try {
+//            if (index >= 0 && index < m_size) {
+//                return m_buffer[index];
+//            }
+//        } catch (std::exception& e) {
+//            std::cerr << e.what() << std::endl;
+//        }
+//    }
 };
