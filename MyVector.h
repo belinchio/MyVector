@@ -1,12 +1,10 @@
 #pragma once
 
 #include <algorithm>
-#include <cstddef>
 #include <iostream>
 #include <iterator>
 #include <initializer_list>
 #include <limits>
-#include <cassert>
 
 template <typename T>
 class Vector {
