@@ -37,5 +37,8 @@ int main(int argc, char const *argv[])
     str.emplace(4, "?");
     PrintVector(str);
 
+    str.erase(3);
+    PrintVector(str);
+
     return 0;
 }
